@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "jimaku-button",
+  "version": "1.0",
+  "description": "Adds a button to AniList or TMDB pages that have a Jimaku entry",
+  "browser_specific_settings": {
+    "gecko": {
+        "id": "rapptz-jimaku-button-ext-amo@jimaku.cc"
+    }
+  },
+  "icons": {
+    "48": "icons/icon.png",
+    "96": "icons/icon@2x.png"
+  },
+  "permissions": [
+    "tabs",
+    "storage"
+  ],
+  "page_action": {
+    "default_icon": "icons/icon.png",
+    "default_title": "Jimaku"
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "options_ui": {
+    "page": "options.html"
+  }
+}
