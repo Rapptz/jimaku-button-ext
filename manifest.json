@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "jimaku-button",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Adds a button to AniList or TMDB pages that have a Jimaku entry",
   "browser_specific_settings": {
     "gecko": {

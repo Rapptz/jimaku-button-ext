@@ -144,7 +144,7 @@ async function main() {
     } else {
       let url = shortTermCache.get(tab.id);
       if(url !== null) {
-        browser.tabs.create({url});
+        browser.tabs.create({url, openerTabId: tab.id, index: tab.index + 1});
       }
     }
   });
