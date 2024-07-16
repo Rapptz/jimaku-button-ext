@@ -12,14 +12,14 @@ async function saveOptions(e) {
     apiKey.setCustomValidity('Improper API key.');
     return;
   }
-  await chrome.storage.local.set({
+  await browser.storage.local.set({
     apiKey: apiKey.value
   });
 }
 
 async function restoreOptions() {
-  let res = await chrome.storage.local.get('apiKey');
-  apiKey.value = res.apiKey ?? '';
+  let res = await browser.storage.local.get('apiKey');
+  apiKey.value = res?.apiKey ?? '';
 }
 
 document.addEventListener('DOMContentLoaded', restoreOptions);

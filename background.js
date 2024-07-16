@@ -22,21 +22,21 @@ const getTmdbId = (url) => {
 
 async function clearCredentials() {
   apiKey = null;
-  await chrome.storage.local.remove('apiKey');
+  await browser.storage.local.remove('apiKey');
 }
 
 async function removeCacheCooldown(cacheKey) {
-  let cache = await chrome.storage.local.get(cacheKey);
+  let cache = await browser.storage.local.get(cacheKey);
   if(cache.hasOwnProperty(cacheKey)) {
     let info = cache[cacheKey];
     if(info.cooldown) {
-      await chrome.storage.local.remove(cacheKey);
+      await browser.storage.local.remove(cacheKey);
     }
   }
 }
 
 async function setCacheCooldown(cacheKey) {
-  await chrome.storage.local.set({
+  await browser.storage.local.set({
     [cacheKey]: {
       cooldown: true,
     }
@@ -46,7 +46,7 @@ async function setCacheCooldown(cacheKey) {
 
 async function searchService(queryName, cacheKey) {
   console.log(cacheKey);
-  let cache = await chrome.storage.local.get(cacheKey);
+  let cache = await browser.storage.local.get(cacheKey);
   if(cache.hasOwnProperty(cacheKey)) {
     let info = cache[cacheKey];
     if(info.cooldown) {
@@ -74,7 +74,7 @@ async function searchService(queryName, cacheKey) {
     return null;
   }
   let entryId = data[0].id;
-  await chrome.storage.local.set({
+  await browser.storage.local.set({
     [cacheKey]: {
       id: entryId
     }
@@ -84,7 +84,7 @@ async function searchService(queryName, cacheKey) {
 
 async function handleTabAction(tab) {
   if(apiKey === null) {
-    await chrome.pageAction.show(tab.id);
+    await browser.pageAction.show(tab.id);
     return;
   }
 
@@ -93,7 +93,7 @@ async function handleTabAction(tab) {
     let url = await searchService('anilist_id', anilistId.toString());
     if(url !== null) {
       shortTermCache.set(tab.id, url);
-      await chrome.pageAction.show(tab.id);
+      await browser.pageAction.show(tab.id);
       return;
     }
   } else {
@@ -101,7 +101,7 @@ async function handleTabAction(tab) {
     if(anilistUsername !== null) {
       let url = `https://jimaku.cc/anilist/${anilistUsername}`;
       shortTermCache.set(tab.id, url);
-      await chrome.pageAction.show(tab.id);
+      await browser.pageAction.show(tab.id);
       return;
     }
     let tmdbId = getTmdbId(tab.url);
@@ -110,44 +110,46 @@ async function handleTabAction(tab) {
       let url = await searchService('tmdb_id', cacheKey);
       if(url !== null) {
         shortTermCache.set(tab.id, url);
-        await chrome.pageAction.show(tab.id);
+        await browser.pageAction.show(tab.id);
         return;
       }
     }
   }
 
-  await chrome.pageAction.hide(tab.id);
+  await browser.pageAction.hide(tab.id);
 }
 
 async function main() {
-  let activeTab = await chrome.tabs.query({active: true, currentWindow: true});
-  await handleTabAction(activeTab[0]);
-  let storedApiKey = await chrome.storage.local.get('apiKey');
-  apiKey = storedApiKey.apiKey ?? null;
+  let activeTab = await browser.tabs.query({active: true, currentWindow: true});
+  if(activeTab?.length > 0) {
+    await handleTabAction(activeTab[0]);
+  }
+  let storedApiKey = await browser.storage.local.get('apiKey');
+  apiKey = storedApiKey?.apiKey ?? null;
 
-  chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     if(!changeInfo.url) {
       return;
     }
-    let getTab = await chrome.tabs.query({active: true, currentWindow: true});
+    let getTab = await browser.tabs.query({active: true, currentWindow: true});
     let activeTab = getTab[0];
     if(tabId === activeTab.id) {
       await handleTabAction(activeTab);
     }
   });
 
-  chrome.pageAction.onClicked.addListener((tab) => {
+  browser.pageAction.onClicked.addListener((tab) => {
     if(apiKey === null) {
-      chrome.runtime.openOptionsPage();
+      browser.runtime.openOptionsPage();
     } else {
       let url = shortTermCache.get(tab.id);
       if(url !== null) {
-        chrome.tabs.create({url});
+        browser.tabs.create({url});
       }
     }
   });
 
-  chrome.storage.onChanged.addListener((changes, area) => {
+  browser.storage.onChanged.addListener((changes, area) => {
     if(area !== "local") {
       return;
     }
